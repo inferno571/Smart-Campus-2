@@ -48,7 +48,16 @@ export async function recognizeFaces(imageBlob: Blob) {
     const schoolConfig = await getSchoolConfig()
 
     // Prepare a minimal prompt for Groq to reduce token usage
-    const prompt = `Identify faces. Return JSON: {faces:[{id,age,gender,position}]}`
+    const prompt = `As a computer vision expert, analyze this image and identify faces. For each face, detect:
+    - Precise position (x,y coordinates)
+    - Age estimation (range)
+    - Gender probability
+    - Notable features (glasses, facial hair, etc)
+    - Head pose orientation
+    - Emotion prediction
+    
+    Return a structured JSON response with confidence scores for each attribute.
+    Format: {faces:[{id,position:{x,y},age_range,gender,confidence,features:[],pose,emotion}]}`
 
     // Check if facial recognition is enabled
     if (!env.ENABLE_FACIAL_RECOGNITION) {

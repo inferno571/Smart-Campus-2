@@ -249,6 +249,7 @@ export function ActivityChart({ data, isLoading }: ActivityChartProps) {
 
                         {/* Normal data line */}
                         <Line
+                          key="activity-line"
                           type="monotone"
                           dataKey="value"
                           stroke="#3b82f6"

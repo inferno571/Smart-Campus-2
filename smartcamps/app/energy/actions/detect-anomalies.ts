@@ -88,6 +88,9 @@ export async function detectAnomalies() {
           },
         ],
         max_tokens: 1024,
+      temperature: 0.2,
+      top_p: 0.9,
+      stream: false,
       }),
     })
 

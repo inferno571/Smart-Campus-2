@@ -80,24 +80,40 @@ export async function getCurrentAccount(): Promise<string | null> {
 }
 
 // ✅ Call recordAttendance() on Monad contract
-export async function markAttendance(): Promise<void> {
+export async function markAttendance(): Promise<{success: boolean; txHash?: string; error?: string}> {
   if (!isMetaMaskInstalled()) {
-    alert("MetaMask not installed")
-    return
+    return { success: false, error: "MetaMask not installed" }
   }
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum as any)
-  const signer = provider.getSigner()
-  const contract = new ethers.Contract(MONAD_CONTRACT_ADDRESS, MONAD_CONTRACT_ABI, signer)
-
   try {
-    const tx = await contract.recordAttendance()
+    const provider = new ethers.providers.Web3Provider(window.ethereum as any)
+    await provider.send("eth_requestAccounts", [])
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(MONAD_CONTRACT_ADDRESS, MONAD_CONTRACT_ABI, signer)
+
+    const network = await provider.getNetwork()
+    if (network.chainId !== 1) {
+      await provider.send("wallet_switchEthereumChain", [{ chainId: "0x1" }])
+    }
+
+    const gasEstimate = await contract.estimateGas.recordAttendance()
+    const tx = await contract.recordAttendance({
+      gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2)
+    })
+    
     console.log("Attendance TX sent:", tx.hash)
-    await tx.wait()
-    alert("Attendance marked successfully!")
+    const receipt = await tx.wait()
+    
+    return { 
+      success: true, 
+      txHash: receipt.transactionHash 
+    }
   } catch (error: any) {
     console.error("Attendance error:", error)
-    alert("Failed to mark attendance. See console for details.")
+    return { 
+      success: false, 
+      error: error.message || "Failed to mark attendance" 
+    }
   }
 }
 
