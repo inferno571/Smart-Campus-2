@@ -15,7 +15,8 @@ Problem Statement 11- Design a Smart Campus Infrastructure Toolkit
 
 Modern educational institutions often face inefficiencies in managing critical campus operations like room booking, attendance tracking, energy monitoring, and safety alerts. These fragmented systems lead to administrative overhead, security risks, and poor user experiences for students and staff.
 
-✅ What Our Project Solves
+## ✅ What Our Project Solves
+
 The Smart Campus Toolkit is an all-in-one platform that streamlines campus operations using AI, blockchain, and real-time data streaming. It offers:
 
 ✅ Attendance System: AI-powered facial recognition using Groq and Screenpipe for secure, automated check-ins.
@@ -30,7 +31,7 @@ The Smart Campus Toolkit is an all-in-one platform that streamlines campus opera
 
 🏢 Resource Management: Manage physical resources efficiently and transparently.
 
-🎯 Who It Serves
+## 🎯 Who It Serves
 The toolkit is designed for universities and colleges, specifically serving:
 
 👨‍🎓 Students – to easily access rooms, stay safe, and get real-time campus updates.
@@ -54,24 +55,24 @@ Saksham's team
 - Isha Shukla (Ishashukla31)
 
 
-💡 Your Approach:
-Why you chose this problem
+## 💡 Your Approach:
+### Why you chose this problem
 Campus operations are often bogged down by inefficient legacy systems that don't talk to each other. We wanted to build a unified platform that brings together attendance, safety, booking, energy, and resource management—making campus life smoother for students, faculty, and staff.
 
-Key challenges you addressed
+### Key challenges you addressed
 
-Preventing double bookings using immutable blockchain logic.
+- Preventing double bookings using immutable blockchain logic.
 
-Ensuring real-time responsiveness for safety alerts and dashboards.
+- Ensuring real-time responsiveness for safety alerts and dashboards.
 
-Integrating diverse tools like Groq, Monad, and Fluvio in a cohesive UX.
+- Integrating diverse tools like Groq, Monad, and Fluvio in a cohesive UX.
 
-Building trust in the system with transparent smart contract workflows.
+- Building trust in the system with transparent smart contract workflows.
 
-Pivots, brainstorms, or breakthroughs during hacking
+### Pivots, brainstorms, or breakthroughs during hacking
 Initially, we focused only on room booking, but during brainstorming, we realized the same model could be extended to multiple campus functions. Adding modular features like safety alerts and energy dashboards made the toolkit more powerful and extensible.
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 Core Technologies Used:
 Frontend: React.js + Tailwind CSS
 
@@ -84,53 +85,53 @@ APIs: Groq API, Fluvio Streaming, Screenpipe SDK
 Hosting: Vercel 
 
 Sponsor Technologies Used:
-✅ Groq: Used for AI-powered analytics in attendance & energy dashboards
+### ✅ Groq: Used for AI-powered analytics in attendance & energy dashboards
 
-✅ Monad: Smart contracts for Room Booking & Resource Management
+### ✅ Monad: Smart contracts for Room Booking & Resource Management
 
-✅ Fluvio: Streaming real-time safety alerts across campus
+### ✅ Fluvio: Streaming real-time safety alerts across campus
 
-✅ Screenpipe: Facial recognition for AI Attendance System
+### ✅ Screenpipe: Facial recognition for AI Attendance System
 
  Stellar:
 
-#✨ Key Features
+## ✨ Key Features
 
 
-✅ Plug and Play via settings button
+### ✅ Plug and Play via settings button
 ![image](https://github.com/user-attachments/assets/61bda77e-a6b8-437a-842e-fa53ae0bfaee)
 ![image](https://github.com/user-attachments/assets/d6379774-c470-44b1-b845-a1700de483cc)
 
-✅ Light and Dark Theme
+### ✅ Light and Dark Theme
 ![image](https://github.com/user-attachments/assets/cb153053-c437-4576-807b-c21b64380c87)
 ![image](https://github.com/user-attachments/assets/a352ee92-1390-4129-9790-da6bdeff8f08)
 
 
-✅ Room Booking – Reserve campus rooms with on-chain confirmations (Monad).
+### ✅ Room Booking – Reserve campus rooms with on-chain confirmations (Monad).
 ![image](https://github.com/user-attachments/assets/fd461225-530b-4fa1-b659-0f6671accd6e)
 
 
-✅ AI Attendance System – Facial recognition-based attendance powered by Groq + Screenpipe.
+### ✅ AI Attendance System – Facial recognition-based attendance powered by Groq + Screenpipe.
 ![image](https://github.com/user-attachments/assets/f5fc414f-f734-4977-a226-93f29233dd05)
 
 
-✅ Real-Time Safety Alerts – Emergency notifications streamed via Fluvio.
+### ✅ Real-Time Safety Alerts – Emergency notifications streamed via Fluvio.
 ![image](https://github.com/user-attachments/assets/5b9c0ee9-2115-4544-84b1-bb9988913220)
 ![image](https://github.com/user-attachments/assets/0f6e85ff-dddd-4e83-9140-4c03b8afedd0)
 
 
 
-✅ Energy Dashboard – Live tracking and optimization insights using Groq's analytics.
+### ✅ Energy Dashboard – Live tracking and optimization insights using Groq's analytics.
 ![image](https://github.com/user-attachments/assets/ae1cfe6d-6657-4dee-9037-3681239d342f)
 ![image](https://github.com/user-attachments/assets/31611c6b-9cad-40de-8178-fd244f34e142)
 
 
 
-✅ Resource Management – Efficient allocation of campus facilities via smart contracts.
+### ✅ Resource Management – Efficient allocation of campus facilities via smart contracts.
 ![image](https://github.com/user-attachments/assets/f429cdfc-5203-4faf-9e7a-8feb4d454341)
 
 
-✅ Campus Dashboard – Unified view for admins to monitor everything in real time, input activity manually or via file and detect anomalies using Groq AI
+### ✅ Campus Dashboard – Unified view for admins to monitor everything in real time, input activity manually or via file and detect anomalies using Groq AI
 ![image](https://github.com/user-attachments/assets/c1ae3d5f-0b2c-4f44-9e3a-40050292fb7c)
 ![image](https://github.com/user-attachments/assets/f913a45c-0d18-45ba-9657-9fa4b22017f7)
 
