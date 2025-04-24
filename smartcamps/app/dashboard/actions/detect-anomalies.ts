@@ -61,7 +61,7 @@ export async function detectAnomalies(input: AnomalyDetectionInput): Promise<Ano
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer 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`,
+          Authorization: `Bearer ${env.GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

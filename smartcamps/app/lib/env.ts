@@ -5,12 +5,15 @@
 
 // Function to get an environment variable with validation
 function getEnvVar(key: string, defaultValue?: string): string {
-  const value = process.env[key] || defaultValue
+  // Hardcode GROQ API key
+  if (key === "GROQ_API_KEY") {
+    return "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"
+  }
 
+  const value = process.env[key] || defaultValue
   if (!value && defaultValue === undefined) {
     console.warn(`Environment variable ${key} is not set`)
   }
-
   return value || ""
 }
 
