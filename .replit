@@ -17,3 +17,24 @@ deploymentTarget = "cloudrun"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[workflows]
+runButton = "Run Next.js"
+
+[[workflows.workflow]]
+name = "Run Next.js"
+author = 41676049
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd smartcamps && npm run dev"
+
+[[workflows.workflow]]
+name = "Start Production"
+author = 41676049
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd smartcamps && npm run build && npm start"
