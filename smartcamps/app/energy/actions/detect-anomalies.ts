@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache"
 
-// Groq API key from environment variables
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "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"
+// Groq API key
+const GROQ_API_KEY = "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"
 
 // Mock energy consumption data
 const energyData = {
