@@ -1,3 +1,4 @@
+
 /**
  * Environment variables configuration
  * Centralizes access to all environment variables used in the application
@@ -5,12 +6,15 @@
 
 // Function to get an environment variable with validation
 function getEnvVar(key: string, defaultValue?: string): string {
-  // Hardcode GROQ API key
-  if (key === "GROQ_API_KEY") {
-    return "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"
+  let value = process.env[key] || defaultValue
+
+  // Production environment variables
+  if (typeof window === 'undefined') {
+    if (key === "GROQ_API_KEY") {
+      value = "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"
+    }
   }
 
-  const value = process.env[key] || defaultValue
   if (!value && defaultValue === undefined) {
     console.warn(`Environment variable ${key} is not set`)
   }
@@ -34,18 +38,7 @@ export const env = {
   ENABLE_BLOCKCHAIN_VERIFICATION: getEnvVar("ENABLE_BLOCKCHAIN_VERIFICATION", "true") === "true",
   ENABLE_FACIAL_RECOGNITION: getEnvVar("ENABLE_FACIAL_RECOGNITION", "true") === "true",
 
-  // Default School Configuration (can be overridden in settings)
+  // Default School Configuration
   NEXT_PUBLIC_DEFAULT_SCHOOL_NAME: getEnvVar("NEXT_PUBLIC_DEFAULT_SCHOOL_NAME", "IIT Delhi"),
   NEXT_PUBLIC_DEFAULT_SCHOOL_SHORT_NAME: getEnvVar("NEXT_PUBLIC_DEFAULT_SCHOOL_SHORT_NAME", "IITD"),
-}
-
-// Function to check if all required environment variables are set
-export function validateEnv(): { valid: boolean; missing: string[] } {
-  const requiredVars = ["GROQ_API_KEY"]
-  const missing = requiredVars.filter((key) => !process.env[key])
-
-  return {
-    valid: missing.length === 0,
-    missing,
-  }
 }
