@@ -1,155 +1,82 @@
-import { BrowserProvider } from "ethers"
-import { Contract } from "ethers"
+// Monad contract address
+export const MONAD_CONTRACT_ADDRESS = "0xE3D6cC3E5bA8c0D5c1b1A1fD5cE6A8bA9c1D3E3F"
 
-export const MONAD_CONTRACT_ADDRESS = "0x4e26818fec4a0Dff696145d7c3D6B6429cb0592F"
+// Default wallet ID (used when user hasn't connected their wallet)
+export const DEFAULT_WALLET_ID = "0x7E6b71af430e09109D5C2eb3d6faB6Df77545d52"
 
-export const MONAD_CONTRACT_ABI = [
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "string", "name": "roomId", "type": "string" },
-      { "indexed": false, "internalType": "uint256", "name": "date", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "timeSlot", "type": "uint256" }
-    ],
-    "name": "BookingCancelled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "string", "name": "roomId", "type": "string" },
-      { "indexed": false, "internalType": "uint256", "name": "date", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "timeSlot", "type": "uint256" },
-      { "indexed": false, "internalType": "address", "name": "booker", "type": "address" }
-    ],
-    "name": "RoomBooked",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "roomId", "type": "string" },
-      { "internalType": "uint256", "name": "date", "type": "uint256" },
-      { "internalType": "uint256", "name": "timeSlot", "type": "uint256" },
-      { "internalType": "string", "name": "purpose", "type": "string" }
-    ],
-    "name": "bookRoom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "roomId", "type": "string" },
-      { "internalType": "uint256", "name": "date", "type": "uint256" },
-      { "internalType": "uint256", "name": "timeSlot", "type": "uint256" }
-    ],
-    "name": "cancelBooking",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "roomId", "type": "string" },
-      { "internalType": "uint256", "name": "date", "type": "uint256" },
-      { "internalType": "uint256", "name": "timeSlot", "type": "uint256" }
-    ],
-    "name": "checkAvailability",
-    "outputs": [
-      { "internalType": "bool", "name": "", "type": "bool" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
-
-
-// ✅ MetaMask check
-export function isMetaMaskInstalled(): boolean {
-  return typeof window !== "undefined" && typeof window.ethereum !== "undefined"
+// Interface for blockchain transaction
+export interface BlockchainTransaction {
+  transactionHash: string
+  blockNumber: number
+  timestamp: string
 }
 
-// ✅ Connect wallet
+// Function to check if MetaMask is installed
+export function isMetaMaskInstalled(): boolean {
+  return typeof window !== "undefined" && window.ethereum !== undefined
+}
+
+// Function to connect to MetaMask
 export async function connectToMetaMask(): Promise<string | null> {
   if (!isMetaMaskInstalled()) {
-    alert("Please install MetaMask")
-    return null
+    throw new Error("MetaMask is not installed")
   }
 
   try {
+    // Request account access
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
     return accounts[0]
   } catch (error) {
-    console.error("MetaMask connection error:", error)
+    console.error("Error connecting to MetaMask:", error)
     return null
   }
 }
 
-// ✅ Get current wallet address
+// Function to get current connected account
 export async function getCurrentAccount(): Promise<string | null> {
-  if (!isMetaMaskInstalled()) return null
+  if (!isMetaMaskInstalled()) {
+    return null
+  }
 
   try {
     const accounts = await window.ethereum.request({ method: "eth_accounts" })
     return accounts.length > 0 ? accounts[0] : null
   } catch (error) {
-    console.error("Get account error:", error)
+    console.error("Error getting current account:", error)
     return null
   }
 }
 
-// ✅ Call recordAttendance() on Monad contract
-export async function markAttendance(): Promise<{success: boolean; txHash?: string; error?: string}> {
+// Function to sign a message with MetaMask
+export async function signMessage(message: string): Promise<string | null> {
   if (!isMetaMaskInstalled()) {
-    return { success: false, error: "MetaMask not installed" }
+    return null
   }
 
   try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum as any)
-    await provider.send("eth_requestAccounts", [])
-    const signer = provider.getSigner()
-    const contract = new ethers.Contract(MONAD_CONTRACT_ADDRESS, MONAD_CONTRACT_ABI, signer)
+    const account = await getCurrentAccount()
+    if (!account) return null
 
-    const network = await provider.getNetwork()
-    if (network.chainId !== 1) {
-      await provider.send("wallet_switchEthereumChain", [{ chainId: "0x1" }])
-    }
-
-    const gasEstimate = await contract.estimateGas.recordAttendance()
-    const tx = await contract.recordAttendance({
-      gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2)
+    const signature = await window.ethereum.request({
+      method: "personal_sign",
+      params: [message, account],
     })
-    
-    console.log("Attendance TX sent:", tx.hash)
-    const receipt = await tx.wait()
-    
-    return { 
-      success: true, 
-      txHash: receipt.transactionHash 
-    }
-  } catch (error: any) {
-    console.error("Attendance error:", error)
-    return { 
-      success: false, 
-      error: error.message || "Failed to mark attendance" 
-    }
+
+    return signature
+  } catch (error) {
+    console.error("Error signing message:", error)
+    return null
   }
 }
 
+// Function to simulate a blockchain transaction
+export async function simulateBlockchainTransaction(): Promise<BlockchainTransaction> {
+  // In a real implementation, this would interact with the Monad blockchain
+  // For demo purposes, we'll simulate a transaction
 
-export async function hasUserAttended(): Promise<boolean> {
-  if (!isMetaMaskInstalled()) return false
-
-  const provider = new ethers.providers.Web3Provider(window.ethereum as any)
-  const signer = provider.getSigner()
-  const user = await signer.getAddress()
-  const contract = new ethers.Contract(MONAD_CONTRACT_ADDRESS, MONAD_CONTRACT_ABI, provider)
-
-  try {
-    const attended = await contract.hasAttended(user)
-    return attended
-  } catch (error) {
-    console.error("Error checking attendance:", error)
-    return false
+  return {
+    transactionHash: "0x" + Math.random().toString(16).substring(2, 42),
+    blockNumber: Math.floor(Math.random() * 1000000) + 12000000,
+    timestamp: new Date().toISOString(),
   }
 }

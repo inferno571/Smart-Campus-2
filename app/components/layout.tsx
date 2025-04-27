@@ -38,8 +38,8 @@ export function Layout({ children, title, backLink, backLabel }: LayoutProps) {
   }, [])
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="border-b fade-in">
+    <div className="flex flex-col min-h-screen max-h-screen bg-background text-foreground overflow-hidden">
+      <header className="border-b fade-in shrink-0">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Mobile menu */}
@@ -128,8 +128,8 @@ export function Layout({ children, title, backLink, backLabel }: LayoutProps) {
           </div>
         </div>
       </header>
-      <main className="flex-1 container py-8 fade-in">{children}</main>
-      <footer className="border-t py-6 fade-in">
+      <main className="flex-1 container py-4 overflow-y-auto fade-in">{children}</main>
+      <footer className="border-t py-4 shrink-0 fade-in">
         <div className="container">
           <div className="flex flex-col items-center gap-2">
             {!isLoading && schoolConfig && (

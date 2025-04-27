@@ -135,6 +135,7 @@ export function AttendanceSystem() {
       setRecognizedStudents(result.recognizedStudents)
       setFaceData(result.faceData || [])
 
+      // Check if we used mock data due to API constraints
       if (result.note && result.note.includes("mock data")) {
         setWarning(
           "Using simulated recognition data due to image size constraints. In a production environment, consider using a dedicated face recognition service.",
@@ -262,6 +263,50 @@ export function AttendanceSystem() {
               </CardContent>
             </Card>
           </div>
+
+          {faceData.length > 0 && (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-medium mb-4">Face Detection Data</h3>
+                <div className="space-y-3">
+                  {faceData.map((face, index) => (
+                    <div key={index} className="p-3 rounded-md border">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <p className="text-sm font-medium">Face ID:</p>
+                          <p className="text-sm text-muted-foreground">{face.id || `Face ${index + 1}`}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Estimated Age:</p>
+                          <p className="text-sm text-muted-foreground">{face.age || "Unknown"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Gender:</p>
+                          <p className="text-sm text-muted-foreground">{face.gender || "Unknown"}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">Position:</p>
+                          <p className="text-sm text-muted-foreground">{formatPosition(face.position)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="upload" className="space-y-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-md">
+                <Camera className="h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+                <p className="text-muted-foreground mb-2">Upload an image for attendance</p>
+                <Button>Upload Image</Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

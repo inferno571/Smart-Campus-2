@@ -126,10 +126,9 @@ export function AttendanceRecords() {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
-  <CalendarIcon className="h-4 w-4" />
-  {date instanceof Date && !isNaN(date.getTime()) ? format(date, "PPP") : "Pick a date"}
-</Button>
-
+                <CalendarIcon className="h-4 w-4" />
+                {date ? format(date, "PPP") : "Pick a date"}
+              </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />

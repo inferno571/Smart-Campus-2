@@ -1,153 +1,95 @@
 "use server"
 
-// In a real implementation, we would import the Fluvio client
-// import { Fluvio } from '@fluvio/client';
+import { revalidatePath } from "next/cache"
 
-// Simulate Fluvio connection
-class FluvioSimulator {
-  private static instance: FluvioSimulator
-  private connected = false
-  private topics: Map<string, any[]> = new Map()
+// In-memory cache for alerts in development/preview mode
+let alertsCache: any[] = [
+  {
+    title: "System Notice",
+    message: "Alert system is initializing. Real-time alerts will appear here.",
+    severity: "info",
+    location: "Campus-wide",
+    timestamp: new Date().toISOString(),
+    time: new Date().toLocaleTimeString(),
+  },
+]
 
-  private constructor() {
-    // Initialize topics
-    this.topics.set("campus-alerts", [])
-    console.log("Fluvio simulator initialized")
-  }
+// Server-side function to get alerts
+export async function subscribeToAlerts() {
+  try {
+    // In a real implementation, this would use the Fluvio client
+    // For the preview environment, we'll use the in-memory cache
 
-  public static getInstance(): FluvioSimulator {
-    if (!FluvioSimulator.instance) {
-      FluvioSimulator.instance = new FluvioSimulator()
+    // Return the cached alerts
+    return { alerts: alertsCache }
+  } catch (error) {
+    console.error("Error subscribing to alerts:", error)
+    return {
+      alerts: alertsCache,
+      error: (error as Error).message,
     }
-    return FluvioSimulator.instance
-  }
-
-  public async connect(): Promise<boolean> {
-    // Simulate connection delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    this.connected = true
-    console.log("Connected to Fluvio")
-    return true
-  }
-
-  public async subscribe(topic: string): Promise<any[]> {
-    if (!this.connected) {
-      throw new Error("Not connected to Fluvio")
-    }
-
-    if (!this.topics.has(topic)) {
-      this.topics.set(topic, [])
-    }
-
-    console.log(`Subscribed to topic: ${topic}`)
-    return this.topics.get(topic) || []
-  }
-
-  public async publish(topic: string, message: any): Promise<void> {
-    if (!this.connected) {
-      throw new Error("Not connected to Fluvio")
-    }
-
-    if (!this.topics.has(topic)) {
-      this.topics.set(topic, [])
-    }
-
-    const topicMessages = this.topics.get(topic) || []
-    topicMessages.unshift({
-      ...message,
-      timestamp: new Date().toISOString(),
-    })
-
-    // Keep only the last 10 messages
-    if (topicMessages.length > 10) {
-      topicMessages.pop()
-    }
-
-    this.topics.set(topic, topicMessages)
-    console.log(`Published to topic ${topic}:`, message)
-  }
-
-  public async getMessages(topic: string): Promise<any[]> {
-    if (!this.connected) {
-      throw new Error("Not connected to Fluvio")
-    }
-
-    return this.topics.get(topic) || []
   }
 }
 
-// Function to subscribe to Fluvio alerts
-export async function subscribeToAlerts() {
+// Server-side function to publish an alert
+export async function publishAlert(alert: any) {
   try {
-    const fluvio = FluvioSimulator.getInstance()
-
-    // Connect to Fluvio if not already connected
-    if (!fluvio.connected) {
-      await fluvio.connect()
+    // Add timestamp if not present
+    if (!alert.timestamp) {
+      alert.timestamp = new Date().toISOString()
     }
 
-    // Subscribe to the campus-alerts topic
-    await fluvio.subscribe("campus-alerts")
-
-    // Get the latest messages
-    const messages = await fluvio.getMessages("campus-alerts")
-
-    // If there are no messages, randomly generate one for demo purposes
-    if (messages.length === 0 && Math.random() < 0.3) {
-      // Generate a random alert
-      const alertTypes = [
-        {
-          title: "Fire Alarm Activated",
-          message:
-            "A fire alarm has been activated in the Science Building. Please evacuate immediately and follow emergency procedures.",
-          severity: "critical",
-          location: "Science Building",
-        },
-        {
-          title: "Weather Alert",
-          message: "Severe weather warning in effect. Seek shelter indoors and stay away from windows.",
-          severity: "warning",
-          location: "All Campus",
-        },
-        {
-          title: "Power Outage",
-          message:
-            "Power outage reported in the Library and surrounding buildings. Maintenance teams have been dispatched.",
-          severity: "info",
-          location: "Library",
-        },
-        {
-          title: "Suspicious Activity",
-          message:
-            "Suspicious activity reported near the North Parking Lot. Campus security has been notified and is investigating.",
-          severity: "warning",
-          location: "North Parking Lot",
-        },
-        {
-          title: "Chemical Spill",
-          message:
-            "Chemical spill reported in Chemistry Lab 101. Hazmat team responding. Please avoid the area until further notice.",
-          severity: "critical",
-          location: "Chemistry Building",
-        },
-      ]
-
-      const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)]
-
-      // Publish the alert to Fluvio
-      await fluvio.publish("campus-alerts", {
-        ...randomAlert,
-        time: new Date().toLocaleTimeString(),
-      })
-
-      // Get the updated messages
-      const updatedMessages = await fluvio.getMessages("campus-alerts")
-      return { alerts: updatedMessages }
+    // Add time if not present
+    if (!alert.time) {
+      alert.time = new Date().toLocaleTimeString()
     }
 
-    return { alerts: messages }
+    // In a real implementation, this would publish to Fluvio
+    // For the preview environment, we'll add to the in-memory cache
+    alertsCache = [alert, ...alertsCache].slice(0, 10)
+
+    // Revalidate the safety page
+    revalidatePath("/safety")
+
+    return { success: true }
   } catch (error) {
-    console.error("Error subscribing to alerts:", error)
-    return { alerts: [] }
+    console.error("Error publishing alert:", error)
+    return {
+      success: false,
+      error: (error as Error).message,
+    }
   }
+}
+
+// Generate a sample alert (for testing)
+export async function generateSampleAlert(severity: "info" | "warning" | "critical" = "info") {
+  const locations = ["Main Building", "Library", "Student Center", "Science Building", "Engineering Building"]
+  const location = locations[Math.floor(Math.random() * locations.length)]
+
+  let title, message
+
+  switch (severity) {
+    case "critical":
+      title = "Emergency Alert"
+      message = `Immediate evacuation required at ${location} due to security threat`
+      break
+    case "warning":
+      title = "Weather Warning"
+      message = `Strong winds expected near ${location}. Secure loose items.`
+      break
+    default:
+      title = "Information Notice"
+      message = `Scheduled maintenance in ${location} today`
+  }
+
+  const alert = {
+    title,
+    message,
+    severity,
+    location,
+    timestamp: new Date().toISOString(),
+    time: new Date().toLocaleTimeString(),
+  }
+
+  return publishAlert(alert)
 }

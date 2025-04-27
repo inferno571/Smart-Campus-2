@@ -1,74 +1,58 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { AlertTriangle, Bell, Megaphone, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { AlertTriangle, Bell, CheckCircle2, Loader2 } from "lucide-react"
 import { triggerAlert } from "../actions/trigger-alert"
-
-// Form schema
-const formSchema = z.object({
-  title: z.string().min(3, {
-    message: "Title must be at least 3 characters.",
-  }),
-  message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
-  }),
-  severity: z.enum(["info", "warning", "critical"], {
-    required_error: "Please select a severity level.",
-  }),
-  location: z.string().min(3, {
-    message: "Location must be at least 3 characters.",
-  }),
-})
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function AlertControls() {
+  const [title, setTitle] = useState("")
+  const [message, setMessage] = useState("")
+  const [severity, setSeverity] = useState("info")
+  const [location, setLocation] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [result, setResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      message: "",
-      severity: "info",
-      location: "",
-    },
-  })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setResult(null)
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsSubmitting(true)
+      const response = await triggerAlert({
+        title,
+        message,
+        severity,
+        location,
+      })
 
-      // Call the server action to trigger the alert
-      const result = await triggerAlert(values)
-
-      if (result.success) {
-        toast({
-          title: "Alert triggered successfully",
-          description: `The alert has been broadcast to all connected devices.`,
+      if (response.success) {
+        setResult({
+          success: true,
+          message: response.message || "Alert successfully broadcast",
         })
-        form.reset()
+        // Reset form on success
+        setTitle("")
+        setMessage("")
+        setSeverity("info")
+        setLocation("")
       } else {
-        toast({
-          variant: "destructive",
-          title: "Failed to trigger alert",
-          description: result.error,
+        setResult({
+          success: false,
+          error: response.error || "Failed to broadcast alert",
         })
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Failed to trigger alert",
-        description: error.message || "An unexpected error occurred",
+      setResult({
+        success: false,
+        error: error.message || "An unexpected error occurred",
       })
     } finally {
       setIsSubmitting(false)
@@ -78,108 +62,88 @@ export function AlertControls() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Trigger Alert</CardTitle>
+        <CardTitle className="text-lg font-medium">Broadcast Alert</CardTitle>
+        <CardDescription>Send emergency alerts to all connected campus devices</CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alert Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Fire Alarm" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Alert Title</Label>
+            <Input
+              id="title"
+              placeholder="Fire Alarm, Weather Warning, etc."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
             />
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alert Message</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Provide details about the alert..." className="min-h-[100px]" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="message">Alert Message</Label>
+            <Input
+              id="message"
+              placeholder="Detailed information about the alert"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Severity</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select severity" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="info">
-                          <div className="flex items-center">
-                            <Bell className="mr-2 h-4 w-4 text-blue-500" />
-                            Information
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="warning">
-                          <div className="flex items-center">
-                            <Megaphone className="mr-2 h-4 w-4 text-yellow-500" />
-                            Warning
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="critical">
-                          <div className="flex items-center">
-                            <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
-                            Critical
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Science Building" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="severity">Severity Level</Label>
+              <Select value={severity} onValueChange={setSeverity} required>
+                <SelectTrigger id="severity">
+                  <SelectValue placeholder="Select severity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Information</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                placeholder="Building or area affected"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
               />
             </div>
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Broadcasting...
-                </>
-              ) : (
-                <>
-                  <Megaphone className="mr-2 h-4 w-4" />
-                  Broadcast Alert
-                </>
-              )}
-            </Button>
-          </form>
-        </Form>
+          </div>
+
+          {result && (
+            <Alert
+              className={
+                result.success
+                  ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300"
+                  : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300"
+              }
+            >
+              {result.success ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+              <AlertDescription>{result.success ? result.message : result.error}</AlertDescription>
+            </Alert>
+          )}
+        </form>
       </CardContent>
-      <CardFooter className="flex justify-between border-t pt-4 text-xs text-muted-foreground">
-        <p>Alerts are broadcast via Fluvio</p>
-        <p>All alerts are logged for audit purposes</p>
+      <CardFooter>
+        <Button
+          type="submit"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !title || !message || !location}
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Broadcasting...
+            </>
+          ) : (
+            <>
+              <Bell className="mr-2 h-4 w-4" /> Broadcast Alert
+            </>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )

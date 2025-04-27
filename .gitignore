@@ -25,8 +25,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-# local caches
-.cache/
-
-# macOS
-.DS_Store
