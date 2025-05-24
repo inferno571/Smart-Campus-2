@@ -52,7 +52,6 @@ Saksham's team
 
 ### Team Members:  
 - Saksham Sooden ([GitHub ](https://github.com/inferno571)/ Full-Stack Web Developer)
-- Isha Shukla (Ishashukla31)
 
 
 ## 💡 Your Approach:
